@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="1-GerenciamentoProdutos.Main/1-GerenciamentoProdutos.Main.csproj" />
+  <Project Path="2-GerenciamentoProdutos.Domain/2-GerenciamentoProdutos.Domain.csproj" />
+  <Project Path="3-GerenciamentoProdutos.Repository/3-GerenciamentoProdutos.Repository.csproj" />
+</Solution>

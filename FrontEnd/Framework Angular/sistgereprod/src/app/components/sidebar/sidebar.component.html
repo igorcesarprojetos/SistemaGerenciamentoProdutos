@@ -1,0 +1,55 @@
+<button class="sidebar-toggle" type="button" [class.is-open]="isOpen" (click)="toggleMenu()"  [attr.aria-expanded]="isOpen" aria-label="Abrir menu">
+  <svg *ngIf="!isOpen" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+  <svg *ngIf="isOpen" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+  </svg>
+</button>
+
+<div class="sidebar-backdrop" [class.show]="isOpen" (click)="closeMenu()"></div>
+
+<aside id="sidebar" [class.open]="isOpen">
+  <div class="sidebar-logo">
+    <h1>GerenciaProd</h1>
+    <span id="sidebar-empresa">—</span>
+  </div>
+  <nav>
+    <div class="nav-section">Principal</div>
+    <a [routerLink]="['/dashboard']" routerLinkActive="active" (click)="closeMenu()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a [routerLink]="['/produtos']" routerLinkActive="active" (click)="closeMenu()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8L6 7h12l-2-4z"/></svg>
+      Produtos
+    </a>
+    <div class="nav-section">Cadastros</div>
+    <a [routerLink]="['/empresa']" routerLinkActive="active" (click)="closeMenu()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7l6-4v18M3 9h6"/></svg>
+      Empresas
+    </a>
+    <a [routerLink]="['/usuario']" routerLinkActive="active" (click)="closeMenu()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+      Usuários
+    </a>
+    <a [routerLink]="['/perfis']" routerLinkActive="active" (click)="closeMenu()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Perfis
+    </a>
+    <a [routerLink]="['/categorias']" routerLinkActive="active" (click)="closeMenu()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Categorias
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="user-avatar">?</div>
+    <div class="user-info">
+      <strong id="user-name">—</strong>
+      <span id="user-perfil">—</span>
+    </div>
+    <button class="btn-logout" id="btn-logout" title="Sair" (click)="logout()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </button>
+  </div>
+</aside>

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" TextQuality="Regular" ReportInfo.Name="RelatorioProdutos" ReportInfo.Description="Relatório de Produtos cadastrados no sistema." ReportInfo.Created="2026-06-16" ReportInfo.Modified="09/25/2026 16:00:31" ReportInfo.CreatorVersion="2026.2.0.0">
+  <Styles>
+    <Style Name="EvenRows" Fill.Color="WhiteSmoke" Font="Arial, 10pt"/>
+  </Styles>
+  <Dictionary>
+    <MsSqlDataConnection Name="Connection" ConnectionString="rijcmlqkl1J1NWzEGXlzkKbI56B9+TzXchEw2dycT+9jLuAtNFbwfqBkjtc0BkGTR1Z/+vCh6pR73paLg3HlXAG/InhL8mrcLVFkQ9L8J7griwNKyDjKTSZBordKdSOe184d3xl0BdYkENs1l520wAdF89XL1jeL3g8G+UDfSWtLnRR/omCPZJjaGsKgW6n3o0lTsENWOeKNrpPCtnQbG55QnZv2AOAwdSgNiSH+8yGjK3HXiHSJyi4L1FXgcA/u8+F/jmw">
+      <TableDataSource Name="Categoria" DataType="System.Int32" Enabled="true" TableName="Categoria">
+        <Column Name="Id_Categoria" DataType="System.Int32"/>
+        <Column Name="Descricao" DataType="System.String"/>
+      </TableDataSource>
+      <TableDataSource Name="Produto" DataType="System.Int32" Enabled="true" TableName="Produto">
+        <Column Name="Id_Produto" DataType="System.Int32"/>
+        <Column Name="Codigo" DataType="System.Int64"/>
+        <Column Name="Nome" DataType="System.String"/>
+        <Column Name="Descricao" DataType="System.String"/>
+        <Column Name="Marca" DataType="System.String"/>
+        <Column Name="QuantidadeEstoque" DataType="System.Int32"/>
+        <Column Name="Id_Categoria" DataType="System.Int32"/>
+        <Column Name="Preco" DataType="System.Decimal"/>
+      </TableDataSource>
+    </MsSqlDataConnection>
+    <Relation Name="Relation1" ParentDataSource="Categoria" ChildDataSource="Produto" ParentColumns="Id_Categoria" ChildColumns="Id_Categoria" Enabled="true"/>
+    <Total Name="QtdCategorias" TotalType="CountDistinct" Expression="[Categoria.Id_Categoria]" Evaluator="Data1" PrintOn="ReportSummary1"/>
+    <Total Name="QtdEstoqueGeral" Expression="[Produto.QuantidadeEstoque]" Evaluator="Data1" PrintOn="ReportSummary1"/>
+    <Total Name="QtdEstoquePorCategoria" Expression="[Produto.QuantidadeEstoque]" Evaluator="Data1" PrintOn="GroupFooter1"/>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="400" PaperHeight="297" LeftMargin="20" TopMargin="20" RightMargin="20" BottomMargin="20" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle1" Top="20" Width="1360.8" Height="56.7">
+      <TextObject Name="TextTitulo" Width="1359.5" Height="28.35" Text="Relatório de Produtos por Categoria&#13;&#10;" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 16pt, style=Bold"/>
+      <TextObject Name="TextSubtitulo" Top="28.35" Width="1359.5" Height="18.9" Text="Emitido em [Date]" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt, style=Italic" TextFill.Color="Gray"/>
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="96.7" Width="1360.8" Height="28.35" Fill.Color="SteelBlue" Guides="47.25">
+      <TextObject Name="HeaderDescricao" Width="302.4" Height="28.35" Text="Categoria&#13;&#10;" Padding="4, 0, 0, 0" VertAlign="Center" Font="Tahoma, 9pt, style=Bold" TextFill.Color="White"/>
+    </PageHeaderBand>
+    <GroupHeaderBand Name="GroupHeader1" Top="145.05" Width="1360.8" Height="85.05" Condition="[Produto.Categoria.Descricao]">
+      <TextObject Name="TextCategoria" Top="9.45" Width="240.9" Height="28.35" Text="[Produto.Categoria.Descricao]" Padding="4, 0, 0, 0" VertAlign="Center" Font="Tahoma, 11pt, style=Bold"/>
+      <TextObject Name="Text2" Left="9.45" Top="56.7" Width="170.1" Height="18.9" Text="Produto" Padding="4, 0, 0, 0" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+      <TextObject Name="Text3" Left="491.4" Top="56.7" Width="253.85" Height="18.9" Text="Quantidade Estoque&#13;&#10;" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+      <LineObject Name="Line1" Left="-18.9" Top="37.8" Width="907.2"/>
+      <TextObject Name="Text5" Left="264.6" Top="56.7" Width="132.3" Height="18.9" Text="Marca&#13;&#10;" Padding="4, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+      <DataBand Name="Data1" Top="250.1" Width="1360.8" Height="28.35" Fill.Color="WhiteSmoke" EvenStyle="EvenRows" DataSource="Produto">
+        <TextObject Name="TextProdutoNome" Left="10" Width="205.5" Height="18.9" Text="[Produto.Nome]" Padding="4, 0, 0, 0" VertAlign="Center" Font="Tahoma, 8pt"/>
+        <TextObject Name="TextProdutoQtd" Left="538.65" Width="168.8" Height="18.9" Text="[Produto.QuantidadeEstoque]" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt"/>
+        <TextObject Name="Text6" Left="255.15" Width="148.8" Height="18.9" Text="[Produto.Marca]" Padding="4, 0, 0, 0" HorzAlign="Center" VertAlign="Center" Font="Tahoma, 8pt"/>
+      </DataBand>
+      <GroupFooterBand Name="GroupFooter1" Top="298.45" Width="1360.8" Height="56.7">
+        <TextObject Name="HeaderEstoque" Top="9.45" Width="584.6" Height="28.35" Text="Total Estoque de [Produto.Categoria.Descricao]:  [QtdEstoquePorCategoria]" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+        <LineObject Name="Line2" Left="-9.45" Top="9.45" Width="907.2"/>
+      </GroupFooterBand>
+    </GroupHeaderBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="375.15" Width="1360.8" Height="37.8" Fill.Color="WhiteSmoke">
+      <TextObject Name="TextTotalItens" Width="312.1" Height="18.9" Text="Quantidade de Categorias: [QtdCategorias]" Padding="4, 0, 0, 0" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+      <TextObject Name="TextTotalEstoque" Left="340.45" Width="518.2" Height="18.9" Text="Quantidade Geral Estoque: [QtdEstoqueGeral]" Padding="0, 0, 4, 0" VertAlign="Center" Font="Tahoma, 9pt, style=Bold"/>
+    </ReportSummaryBand>
+    <PageFooterBand Name="PageFooter1" Top="432.95" Width="1360.8" Height="22.65">
+      <TextObject Name="TextRodape" Width="757.4" Height="18.9" Text="Sistema de Gerenciamento de Produtos" VertAlign="Center" Font="Tahoma, 7pt" TextFill.Color="Gray"/>
+      <TextObject Name="TextPagina" Left="1107.05" Width="252.45" Height="18.9" Text="Página [PageN] de [TotalPages#]" HorzAlign="Right" VertAlign="Center" Font="Tahoma, 7pt" TextFill.Color="Gray"/>
+    </PageFooterBand>
+  </ReportPage>
+</Report>

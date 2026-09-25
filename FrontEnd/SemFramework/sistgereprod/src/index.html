@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gerenciamento de Produtos</title>
+  <!-- <script src="https://kit.fontawesome.com/def23bac99.js" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<!-- ── Bootstrap da aplicação ── -->
+<script>
+  
+  /**
+   * App — ponto de entrada da aplicação.
+   */
+  window.App = new (class App {
+    constructor() {
+      this.init();
+    }
+
+    /** Chamado após login bem-sucedido. */
+    init() { 
+      navigation.navigate('./pages/login/login.html');
+    }
+  })();
+</script>
+
+</body>
+</html>

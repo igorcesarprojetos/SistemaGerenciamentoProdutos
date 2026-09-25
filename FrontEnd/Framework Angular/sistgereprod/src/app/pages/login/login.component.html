@@ -1,0 +1,35 @@
+<div id="screen-login">
+  <div class="login-card">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="26" height="26" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
+          <path d="M16 3H8L6 7h12l-2-4z"/>
+        </svg>
+      </div>
+      <h2>Gerenciamento de Produtos</h2>
+      <p>Entre com suas credenciais para continuar</p>
+    </div>
+    <form (ngSubmit)="onSubmit()" class="grid gap-3 sm:gap-4 md:gap-5">
+      <div class="form-group mb-1">
+        <label>Login</label>
+        <!-- [ngModelOptions]="{standalone: true}"         -->
+        <input type="text" id="login-user" placeholder="seu.login" autocomplete="username" name="login" [(ngModel)]="loginAuth.login">
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label>Senha</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" name="senha" [(ngModel)]="loginAuth.senha">
+      </div>
+      <button class="btn btn-primary" id="btn-login" style="width:100%;margin-top:20px;justify-content:center;padding:10px 16px">
+        Entrar
+      </button>
+      <p id="login-error" class="text-danger" style="font-size:12px;margin-top:10px;text-align:center;display:none"></p>
+    </form>
+    <div class="registrar flex justify-center items-center mt-4">
+      <a [routerLink]="['/registrar']">        
+        <svg class="mx-5" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+        Registrar
+      </a>
+    </div>             
+  </div>
+</div>

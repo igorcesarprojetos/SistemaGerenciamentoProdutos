@@ -1,0 +1,66 @@
+<!-- 
+<div id="toast-container"></div>
+
+<app-sidebar [isHandset]="isHandset"></app-sidebar>
+
+
+<div class="form-grid grid lg:grid-cols-2 gap-4 mb-4">
+    {{title}}    
+    <div class="">
+        <label>Nome Fantasia *</label>
+        <input id="f-nfantasia" [(ngModel)]="empresa.nomeFantasia" required>
+    </div>
+    <div class="">
+        <label>Razão Social</label>
+        <input id="f-rsocial" name="razaoSocial" [(ngModel)]="empresa.razaoSocial" required>
+    </div>
+    <div class="">
+        <label>CNPJ</label>
+        <input id="f-cnpj" [(ngModel)]="empresa.cnpj" placeholder="00.000.000/0000-00" required>
+    </div>
+</div>
+
+<button class="btn btn-primary" (click)="saveEmpresa(empresa.id,empresa)">{{empresa.id ? 'Salvar' : 'Criar Empresa'}}</button>
+<button class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+@if(empresa){
+    <button class="btn btn-danger" (click)="deleteEmpresa(empresa.id, empresa.nomeFantasia)">Excluir Empresa</button>
+} -->
+
+
+<div id="toast-container"></div>
+
+<app-sidebar [isHandset]="isHandset"></app-sidebar>
+
+<!-- Contêiner principal da página: compensa a largura da sidebar e dá padding -->
+<main class="lg:pl-64 p-6">
+
+  <h1 class="text-xl font-semibold mx-13 my-4">{{title}}</h1>
+
+  <div class="form-grid grid lg:grid-cols-2 gap-4 m-4">
+    <div>
+      <label class="block mb-1">Nome Fantasia *</label>
+      <input id="f-nfantasia" class="input w-full" [(ngModel)]="empresa.nomeFantasia" required>
+    </div>
+    <div>
+      <label class="block mb-1">Razão Social</label>
+      <input id="f-rsocial" name="razaoSocial" class="input w-full" [(ngModel)]="empresa.razaoSocial" required>
+    </div>
+    <div>
+      <label class="block mb-1">CNPJ</label>
+      <input id="f-cnpj" class="input w-full" [(ngModel)]="empresa.cnpj" placeholder="00.000.000/0000-00" required>
+    </div>
+  </div>
+
+  <div class="flex gap-2 m-4">
+    <button class="btn btn-primary" (click)="saveEmpresa(empresa.id,empresa)">
+      {{empresa.id ? 'Salvar' : 'Criar Empresa'}}
+    </button>
+    <button class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+    @if(empresa){
+      <button class="btn btn-danger" (click)="deleteEmpresa(empresa.id, empresa.nomeFantasia)">
+        Excluir Empresa
+      </button>
+    }
+  </div>
+
+</main>

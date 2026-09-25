@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Gerenciamento de Produtos</title>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<style>
+  :root {
+    --primary: #1D9E75;
+    --primary-dark: #0F6E56;
+    --primary-light: #E1F5EE;
+    --danger: #E24B4A;
+    --danger-light: #FCEBEB;
+    --warning: #BA7517;
+    --warning-light: #FAEEDA;
+    --info: #378ADD;
+    --info-light: #E6F1FB;
+    --text: #2C2C2A;
+    --text-muted: #5F5E5A;
+    --text-light: #888780;
+    --bg: #F8FAFB;
+    --surface: #FFFFFF;
+    --border: #D3D1C7;
+    --border-light: #F1EFE8;
+    --sidebar-w: 240px;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  #app { display: flex; min-height: 100vh; }
+
+  aside {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform .25s;
+  }
+
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .sidebar-logo h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    letter-spacing: -.3px;
+  }
+  .sidebar-logo span { font-size: 11px; color: var(--text-muted); }
+
+  nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+
+  .nav-section { font-size: 10px; font-weight: 600; color: var(--text-light); letter-spacing: .8px; text-transform: uppercase; padding: 12px 12px 6px; }
+
+  nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    color: var(--text-muted); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    transition: background .15s, color .15s;
+    cursor: pointer;
+  }
+  nav a:hover { background: var(--border-light); color: var(--text); }
+  nav a.active { background: var(--primary-light); color: var(--primary-dark); }
+  nav a svg { flex-shrink: 0; }
+
+  .sidebar-user {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-light);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--primary-dark);
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-info strong { display: block; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-info span { font-size: 11px; color: var(--text-light); }
+  .btn-logout {
+    background: none; border: none; cursor: pointer; padding: 4px;
+    color: var(--text-light); border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .btn-logout:hover { color: var(--danger); background: var(--danger-light); }
+
+  main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .content { padding: 28px; flex: 1; }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Login ── */
+  #screen-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--primary-light) 0%, #fff 60%);
+  }
+  #screen-login.active { display: flex; }
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.07);
+  }
+  .login-card .logo-wrap { text-align: center; margin-bottom: 28px; }
+  .login-card .logo-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: var(--primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .login-card h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .login-card p { font-size: 13px; color: var(--text-muted); }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .stat-card .stat-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .stat-card .stat-value { font-size: 26px; font-weight: 700; color: var(--text); }
+
+  /* ── Cards e Tables ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-header h3 { font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+    color: var(--text-muted); padding: 10px 16px;
+    text-align: left; background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg); }
+
+  /* ── Forms ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid.one-col { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  input, select, textarea {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color .15s;
+    font-family: inherit;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,158,117,.12); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none;
+    transition: opacity .15s, transform .1s;
+    text-decoration: none;
+  }
+  .btn:hover { opacity: .88; }
+  .btn:active { transform: scale(.98); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+  .btn-icon { padding: 6px; border-radius: var(--radius-sm); }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge-green { background: #EAF3DE; color: #3B6D11; }
+  .badge-red { background: var(--danger-light); color: var(--danger); }
+  .badge-blue { background: var(--info-light); color: var(--info); }
+  .badge-amber { background: var(--warning-light); color: var(--warning); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,.45);
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 14px;
+    width: 100%; max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h3 { font-size: 16px; font-weight: 700; }
+  .modal-body { padding: 24px; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-light);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  /* ── Toast ── */
+  #toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 2000;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toast {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500;
+    color: #fff; max-width: 320px;
+    animation: toast-in .25s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { background: var(--primary-dark); }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--info); }
+  @keyframes toast-in { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── Search / Filter ── */
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+  .search-wrap { position: relative; flex: 1; max-width: 320px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+  .search-wrap input { padding-left: 34px; }
+
+  /* ── Empty ── */
+  .empty {
+    text-align: center; padding: 48px 20px;
+    color: var(--text-muted);
+  }
+  .empty svg { margin-bottom: 12px; opacity: .4; }
+  .empty p { font-size: 13px; }
+
+  /* ── Loading ── */
+  .loading { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; }
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2px solid var(--border); border-top-color: var(--primary);
+    border-radius: 50%; animation: spin .7s linear infinite;
+    margin-right: 8px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Misc ── */
+  .text-danger { color: var(--danger); }
+  .text-muted { color: var(--text-muted); font-size: 12px; }
+  .flex { display: flex; }
+  .gap-2 { gap: 8px; }
+  .mt-1 { margin-top: 8px; }
+  .mb-1 { margin-bottom: 8px; }
+
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 0px; }
+    aside { transform: translateX(-240px); }
+    aside.open { transform: translateX(0); width: 240px; }
+    main { margin-left: 0; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- ── LOGIN ── -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="26" height="26" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
+          <path d="M16 3H8L6 7h12l-2-4z"/>
+        </svg>
+      </div>
+      <h2>Gerenciamento de Produtos</h2>
+      <p>Entre com suas credenciais para continuar</p>
+    </div>
+    <div class="form-group mb-1">
+      <label>Login</label>
+      <input type="text" id="login-user" placeholder="seu.login" autocomplete="username">
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="btn-login" style="width:100%;margin-top:20px;justify-content:center;padding:10px 16px">
+      Entrar
+    </button>
+    <p id="login-error" class="text-danger" style="font-size:12px;margin-top:10px;text-align:center;display:none"></p>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app" style="display:none">
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <h1>GerenciaProd</h1>
+      <span id="sidebar-empresa">—</span>
+    </div>
+    <nav>
+      <div class="nav-section">Principal</div>
+      <a class="active" data-screen="dashboard">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a data-screen="produtos">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8L6 7h12l-2-4z"/></svg>
+        Produtos
+      </a>
+      <div class="nav-section">Cadastros</div>
+      <a data-screen="empresas">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7l6-4v18M3 9h6"/></svg>
+        Empresas
+      </a>
+      <a data-screen="usuarios">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+        Usuários
+      </a>
+      <a data-screen="perfis">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Perfis
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div class="user-info">
+        <strong id="user-name">—</strong>
+        <span id="user-perfil">—</span>
+      </div>
+      <button class="btn-logout" id="btn-logout" title="Sair">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div class="header-title" id="header-title">Dashboard</div>
+      <div class="header-actions" id="header-actions"></div>
+    </header>
+
+    <div class="content">
+
+      <!-- Dashboard -->
+      <div id="screen-dashboard" class="screen active">
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg width="14" height="14" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+              Produtos
+            </div>
+            <div class="stat-value" id="stat-produtos">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg width="14" height="14" fill="none" stroke="var(--info)" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7l6-4v18"/></svg>
+              Empresas
+            </div>
+            <div class="stat-value" id="stat-empresas">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg width="14" height="14" fill="none" stroke="var(--warning)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+              Usuários
+            </div>
+            <div class="stat-value" id="stat-usuarios">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg width="14" height="14" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Perfis
+            </div>
+            <div class="stat-value" id="stat-perfis">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Produtos Recentes</h3>
+          </div>
+          <div id="dashboard-table">
+            <div class="loading"><span class="spinner"></span>Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produtos -->
+      <div id="screen-produtos" class="screen">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-produtos" placeholder="Buscar produto...">
+          </div>
+        </div>
+        <div class="card">
+          <div id="table-produtos"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+        </div>
+      </div>
+
+      <!-- Empresas -->
+      <div id="screen-empresas" class="screen">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-empresas" placeholder="Buscar empresa...">
+          </div>
+        </div>
+        <div class="card">
+          <div id="table-empresas"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+        </div>
+      </div>
+
+      <!-- Usuários -->
+      <div id="screen-usuarios" class="screen">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-usuarios" placeholder="Buscar usuário...">
+          </div>
+        </div>
+        <div class="card">
+          <div id="table-usuarios"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+        </div>
+      </div>
+
+      <!-- Perfis -->
+      <div id="screen-perfis" class="screen">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-perfis" placeholder="Buscar perfil...">
+          </div>
+        </div>
+        <div class="card">
+          <div id="table-perfis"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">—</h3>
+      <button class="btn btn-ghost btn-sm btn-icon" id="modal-close">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- ── CONFIRM ── -->
+<div class="modal-overlay" id="confirm-overlay">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-body" style="text-align:center;padding:28px 24px">
+      <svg width="40" height="40" fill="none" stroke="var(--danger)" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom:12px">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="var(--danger)"/>
+      </svg>
+      <h3 style="font-size:16px;margin-bottom:8px" id="confirm-title">Confirmar exclusão</h3>
+      <p class="text-muted" id="confirm-msg">Esta ação não pode ser desfeita.</p>
+    </div>
+    <div class="modal-footer" style="justify-content:center">
+      <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE_URL = 'https://localhost:7204/';
+let token = localStorage.getItem('gp_token') || '';
+let userData = JSON.parse(localStorage.getItem('gp_user') || 'null');
+
+const api = axios.create({ baseURL: BASE_URL });
+api.interceptors.request.use(cfg => {
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
+});
+api.interceptors.response.use(r => r, err => {
+  if (err.response?.status === 401) { logout(); }
+  return Promise.reject(err);
+});
+
+// ── Toast ──
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = {
+    success: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+    error: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    info: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/></svg>'
+  };
+  el.innerHTML = `${icons[type]||''} ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── Confirm ──
+function confirm(title, msg) {
+  return new Promise(resolve => {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-overlay').classList.add('open');
+    document.getElementById('confirm-ok').onclick = () => { document.getElementById('confirm-overlay').classList.remove('open'); resolve(true); };
+    document.getElementById('confirm-cancel').onclick = () => { document.getElementById('confirm-overlay').classList.remove('open'); resolve(false); };
+  });
+}
+
+// ── Modal ──
+function openModal(title, bodyHtml, footerHtml) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal-footer').innerHTML = footerHtml;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-close').onclick = closeModal;
+
+// ── Auth ──
+document.getElementById('btn-login').onclick = async () => {
+  const login = document.getElementById('login-user').value.trim();
+  const senha = document.getElementById('login-pass').value.trim();
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if (!login || !senha) { errEl.textContent = 'Preencha login e senha.'; errEl.style.display = 'block'; return; }
+  const btn = document.getElementById('btn-login');
+  btn.textContent = 'Entrando…'; btn.disabled = true;
+  try {
+    const { data } = await api.post('/Authentication/login', { login, senha });
+    token = data.token;
+    userData = data;
+    localStorage.setItem('gp_token', token);
+    localStorage.setItem('gp_user', JSON.stringify(data));
+    initApp();
+  } catch(e) {
+    errEl.textContent = 'Login ou senha inválidos.';
+    errEl.style.display = 'block';
+  } finally { btn.textContent = 'Entrar'; btn.disabled = false; }
+};
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('btn-login').click(); });
+
+function logout() {
+  token = ''; userData = null;
+  localStorage.removeItem('gp_token');
+  localStorage.removeItem('gp_user');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('screen-login').classList.add('active');
+}
+document.getElementById('btn-logout').onclick = logout;
+
+// ── Navigation ──
+const titles = { dashboard:'Dashboard', produtos:'Produtos', empresas:'Empresas', usuarios:'Usuários', perfis:'Perfis' };
+const actionsBtns = {
+  produtos: () => `<button class="btn btn-primary btn-sm" id="btn-new-produto"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo Produto</button>`,
+  empresas: () => `<button class="btn btn-primary btn-sm" id="btn-new-empresa"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova Empresa</button>`,
+  usuarios: () => `<button class="btn btn-primary btn-sm" id="btn-new-usuario"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo Usuário</button>`,
+  perfis: () => `<button class="btn btn-primary btn-sm" id="btn-new-perfil"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo Perfil</button>`,
+};
+
+function navigate(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelector(`nav a[data-screen="${name}"]`).classList.add('active');
+  document.getElementById('header-title').textContent = titles[name];
+  document.getElementById('header-actions').innerHTML = actionsBtns[name] ? actionsBtns[name]() : '';
+  bindActionBtn(name);
+  if (name === 'dashboard') loadDashboard();
+  else if (name === 'produtos') loadProdutos();
+  else if (name === 'empresas') loadEmpresas();
+  else if (name === 'usuarios') loadUsuarios();
+  else if (name === 'perfis') loadPerfis();
+}
+
+function bindActionBtn(name) {
+  setTimeout(() => {
+    const m = { produto: openProdutoModal, empresa: openEmpresaModal, usuario: openUsuarioModal, perfil: openPerfilModal };
+    Object.entries(m).forEach(([k,fn]) => {
+      const el = document.getElementById(`btn-new-${k}`);
+      if (el) el.onclick = () => fn();
+    });
+  }, 10);
+}
+
+document.querySelectorAll('nav a').forEach(a => {
+  a.addEventListener('click', () => navigate(a.dataset.screen));
+});
+
+// ── Init ──
+function initApp() {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('app').style.display = 'flex';
+  if (userData) {
+    document.getElementById('user-name').textContent = userData.nomeUsuario || userData.NomeUsuario || '—';
+    document.getElementById('user-perfil').textContent = userData.descricaoPerfil || userData.DescricaoPerfil || '—';
+    document.getElementById('sidebar-empresa').textContent = userData.nomeEmpresa || userData.NomeEmpresa || '—';
+    const n = (userData.nomeUsuario || userData.NomeUsuario || '?');
+    document.getElementById('user-avatar').textContent = n.substring(0,2).toUpperCase();
+  }
+  navigate('dashboard');
+}
+
+// ══════════════════════════════════════════════
+// ── DASHBOARD ──
+// ══════════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const [pr, em, us, pe] = await Promise.all([
+      api.get('/Produto').catch(()=>({data:[]})),
+      api.get('/Empresa').catch(()=>({data:[]})),
+      api.get('/Usuario').catch(()=>({data:[]})),
+      api.get('/Perfil').catch(()=>({data:[]})),
+    ]);
+    document.getElementById('stat-produtos').textContent = (pr.data||[]).length;
+    document.getElementById('stat-empresas').textContent = (em.data||[]).length;
+    document.getElementById('stat-usuarios').textContent = (us.data||[]).length;
+    document.getElementById('stat-perfis').textContent = (pe.data||[]).length;
+
+    const produtos = (pr.data||[]).slice(0,8);
+    document.getElementById('dashboard-table').innerHTML = produtos.length
+      ? `<table>
+          <thead><tr><th>Código</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Estoque</th></tr></thead>
+          <tbody>${produtos.map(p=>`<tr>
+            <td><span class="badge badge-blue">${p.codigo||p.Codigo||'—'}</span></td>
+            <td><strong>${p.nome||p.Nome||'—'}</strong></td>
+            <td>${p.marca||p.Marca||'—'}</td>
+            <td><span class="badge badge-amber">${p.categoria||p.Categoria||'—'}</span></td>
+            <td><span class="badge ${(p.quantidadeEstoque||p.QuantidadeEstoque||0)>0?'badge-green':'badge-red'}">${p.quantidadeEstoque||p.QuantidadeEstoque||0}</span></td>
+          </tr>`).join('')}</tbody>
+        </table>`
+      : `<div class="empty"><p>Nenhum produto cadastrado.</p></div>`;
+  } catch(e) { document.getElementById('dashboard-table').innerHTML = '<div class="empty"><p>Erro ao carregar dados.</p></div>'; }
+}
+
+// ══════════════════════════════════════════════
+// ── PRODUTOS ──
+// ══════════════════════════════════════════════
+let produtosData = [];
+async function loadProdutos() {
+  document.getElementById('table-produtos').innerHTML = '<div class="loading"><span class="spinner"></span>Carregando...</div>';
+  try {
+    const { data } = await api.get('/Produto');
+    produtosData = data || [];
+    renderProdutos(produtosData);
+  } catch(e) { document.getElementById('table-produtos').innerHTML = '<div class="empty"><p>Erro ao carregar produtos.</p></div>'; }
+}
+
+function renderProdutos(list) {
+  document.getElementById('table-produtos').innerHTML = list.length
+    ? `<table>
+        <thead><tr><th>Código</th><th>Nome</th><th>Descrição</th><th>Marca</th><th>Categoria</th><th>Estoque</th><th style="text-align:right">Ações</th></tr></thead>
+        <tbody>${list.map(p=>`<tr>
+          <td><span class="badge badge-blue">${p.codigo||p.Codigo||'—'}</span></td>
+          <td><strong>${p.nome||p.Nome||'—'}</strong></td>
+          <td class="text-muted">${p.descricao||p.Descricao||'—'}</td>
+          <td>${p.marca||p.Marca||'—'}</td>
+          <td><span class="badge badge-amber">${p.categoria||p.Categoria||'—'}</span></td>
+          <td><span class="badge ${(p.quantidadeEstoque||p.QuantidadeEstoque||0)>0?'badge-green':'badge-red'}">${p.quantidadeEstoque||p.QuantidadeEstoque||0}</span></td>
+          <td style="text-align:right">
+            <div class="flex gap-2" style="justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="openProdutoModal(${p.id||p.Id})" title="Editar">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteProduto(${p.id||p.Id},'${(p.nome||p.Nome||'').replace(/'/g,"\\'")}')">
+                <svg width="13" height="13" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    : `<div class="empty"><p>Nenhum produto cadastrado.</p></div>`;
+}
+
+document.getElementById('search-produtos').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderProdutos(produtosData.filter(p => (p.nome||p.Nome||'').toLowerCase().includes(q) || (p.marca||p.Marca||'').toLowerCase().includes(q) || (p.categoria||p.Categoria||'').toLowerCase().includes(q)));
+});
+
+function openProdutoModal(id) {
+  const p = id ? produtosData.find(x => (x.id||x.Id) === id) : null;
+  const v = p || {};
+  openModal(id ? 'Editar Produto' : 'Novo Produto', `
+    <div class="form-grid">
+      <div class="form-group"><label>Código</label><input id="f-codigo" type="number" value="${v.codigo||v.Codigo||''}"></div>
+      <div class="form-group"><label>Nome *</label><input id="f-nome" value="${v.nome||v.Nome||''}"></div>
+      <div class="form-group full"><label>Descrição</label><textarea id="f-descricao">${v.descricao||v.Descricao||''}</textarea></div>
+      <div class="form-group"><label>Marca</label><input id="f-marca" value="${v.marca||v.Marca||''}"></div>
+      <div class="form-group"><label>Categoria</label><input id="f-categoria" value="${v.categoria||v.Categoria||''}"></div>
+      <div class="form-group"><label>Quantidade em Estoque</label><input id="f-estoque" type="number" value="${v.quantidadeEstoque||v.QuantidadeEstoque||0}"></div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-primary" onclick="saveProduto(${id||0})">${id?'Salvar':'Criar Produto'}</button>`
+  );
+}
+
+async function saveProduto(id) {
+  const body = {
+    codigo: parseInt(document.getElementById('f-codigo').value)||0,
+    nome: document.getElementById('f-nome').value.trim(),
+    descricao: document.getElementById('f-descricao').value.trim(),
+    marca: document.getElementById('f-marca').value.trim(),
+    categoria: document.getElementById('f-categoria').value.trim(),
+    quantidadeEstoque: parseInt(document.getElementById('f-estoque').value)||0,
+  };
+  if (!body.nome) { toast('Nome é obrigatório.','error'); return; }
+  try {
+    if (id) await api.put(`/Produto/${id}`, body);
+    else await api.post('/Produto', body);
+    toast(id ? 'Produto atualizado!' : 'Produto criado!');
+    closeModal(); loadProdutos();
+  } catch(e) { toast(e.response?.data || 'Erro ao salvar produto.','error'); }
+}
+
+async function deleteProduto(id, nome) {
+  if (!await confirm('Excluir produto?', `"${nome}" será removido permanentemente.`)) return;
+  try { await api.delete(`/Produto/${id}`); toast('Produto excluído.'); loadProdutos(); }
+  catch(e) { toast('Erro ao excluir produto.','error'); }
+}
+
+// ══════════════════════════════════════════════
+// ── EMPRESAS ──
+// ══════════════════════════════════════════════
+let empresasData = [];
+async function loadEmpresas() {
+  document.getElementById('table-empresas').innerHTML = '<div class="loading"><span class="spinner"></span>Carregando...</div>';
+  try {
+    const { data } = await api.get('/Empresa');
+    empresasData = data || [];
+    renderEmpresas(empresasData);
+  } catch(e) { document.getElementById('table-empresas').innerHTML = '<div class="empty"><p>Erro ao carregar empresas.</p></div>'; }
+}
+
+function renderEmpresas(list) {
+  document.getElementById('table-empresas').innerHTML = list.length
+    ? `<table>
+        <thead><tr><th>ID</th><th>Nome Fantasia</th><th>Razão Social</th><th>CNPJ</th><th style="text-align:right">Ações</th></tr></thead>
+        <tbody>${list.map(e=>`<tr>
+          <td class="text-muted">#${e.id||e.Id}</td>
+          <td><strong>${e.nomeFantasia||e.NomeFantasia||'—'}</strong></td>
+          <td>${e.razaoSocial||e.RazaoSocial||'—'}</td>
+          <td class="text-muted">${e.cnpj||e.CNPJ||'—'}</td>
+          <td style="text-align:right">
+            <div class="flex gap-2" style="justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="openEmpresaModal(${e.id||e.Id})" title="Editar">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteEmpresa(${e.id||e.Id},'${(e.nomeFantasia||e.NomeFantasia||'').replace(/'/g,"\\'")}')">
+                <svg width="13" height="13" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    : `<div class="empty"><p>Nenhuma empresa cadastrada.</p></div>`;
+}
+
+document.getElementById('search-empresas').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderEmpresas(empresasData.filter(x => (x.nomeFantasia||x.NomeFantasia||'').toLowerCase().includes(q) || (x.cnpj||x.CNPJ||'').includes(q)));
+});
+
+function openEmpresaModal(id) {
+  const em = id ? empresasData.find(x => (x.id||x.Id) === id) : null;
+  const v = em || {};
+  openModal(id ? 'Editar Empresa' : 'Nova Empresa', `
+    <div class="form-grid one-col">
+      <div class="form-group"><label>Nome Fantasia *</label><input id="f-nfantasia" value="${v.nomeFantasia||v.NomeFantasia||''}"></div>
+      <div class="form-group"><label>Razão Social</label><input id="f-rsocial" value="${v.razaoSocial||v.RazaoSocial||''}"></div>
+      <div class="form-group"><label>CNPJ</label><input id="f-cnpj" value="${v.cnpj||v.CNPJ||''}" placeholder="00.000.000/0000-00"></div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-primary" onclick="saveEmpresa(${id||0})">${id?'Salvar':'Criar Empresa'}</button>`
+  );
+}
+
+async function saveEmpresa(id) {
+  const body = {
+    nomeFantasia: document.getElementById('f-nfantasia').value.trim(),
+    razaoSocial: document.getElementById('f-rsocial').value.trim(),
+    cnpj: document.getElementById('f-cnpj').value.trim(),
+  };
+  if (!body.nomeFantasia) { toast('Nome Fantasia é obrigatório.','error'); return; }
+  try {
+    if (id) await api.put(`/Empresa/${id}`, body);
+    else await api.post('/Empresa', body);
+    toast(id ? 'Empresa atualizada!' : 'Empresa criada!');
+    closeModal(); loadEmpresas();
+  } catch(e) { toast(e.response?.data || 'Erro ao salvar empresa.','error'); }
+}
+
+async function deleteEmpresa(id, nome) {
+  if (!await confirm('Excluir empresa?', `"${nome}" será removida permanentemente.`)) return;
+  try { await api.delete(`/Empresa/${id}`); toast('Empresa excluída.'); loadEmpresas(); }
+  catch(e) { toast('Erro ao excluir empresa.','error'); }
+}
+
+// ══════════════════════════════════════════════
+// ── USUÁRIOS ──
+// ══════════════════════════════════════════════
+let usuariosData = [];
+async function loadUsuarios() {
+  document.getElementById('table-usuarios').innerHTML = '<div class="loading"><span class="spinner"></span>Carregando...</div>';
+  try {
+    const [{ data: us }, { data: em }, { data: pe }] = await Promise.all([
+      api.get('/Usuario'),
+      api.get('/Empresa').catch(()=>({data:[]})),
+      api.get('/Perfil').catch(()=>({data:[]})),
+    ]);
+    usuariosData = us || [];
+    window._empresasList = em || [];
+    window._perfisList = pe || [];
+    renderUsuarios(usuariosData);
+  } catch(e) { document.getElementById('table-usuarios').innerHTML = '<div class="empty"><p>Erro ao carregar usuários.</p></div>'; }
+}
+
+function renderUsuarios(list) {
+  document.getElementById('table-usuarios').innerHTML = list.length
+    ? `<table>
+        <thead><tr><th>ID</th><th>Nome</th><th>Login</th><th>E-mail</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
+        <tbody>${list.map(u=>`<tr>
+          <td class="text-muted">#${u.id||u.Id}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--primary-dark);flex-shrink:0">${(u.nome||u.Nome||'?').substring(0,2).toUpperCase()}</div>
+              <strong>${u.nome||u.Nome||'—'}</strong>
+            </div>
+          </td>
+          <td class="text-muted">${u.login||u.Login||'—'}</td>
+          <td class="text-muted">${u.email||u.Email||'—'}</td>
+          <td><span class="badge ${(u.indAtivo||u.IndAtivo)?'badge-green':'badge-red'}">${(u.indAtivo||u.IndAtivo)?'Ativo':'Inativo'}</span></td>
+          <td style="text-align:right">
+            <div class="flex gap-2" style="justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="openUsuarioModal(${u.id||u.Id})" title="Editar">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteUsuario(${u.id||u.Id},'${(u.nome||u.Nome||'').replace(/'/g,"\\'")}')">
+                <svg width="13" height="13" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    : `<div class="empty"><p>Nenhum usuário cadastrado.</p></div>`;
+}
+
+document.getElementById('search-usuarios').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderUsuarios(usuariosData.filter(u => (u.nome||u.Nome||'').toLowerCase().includes(q) || (u.email||u.Email||'').toLowerCase().includes(q)));
+});
+
+function openUsuarioModal(id) {
+  const u = id ? usuariosData.find(x => (x.id||x.Id) === id) : null;
+  const v = u || {};
+  const ems = (window._empresasList||[]).map(e=>`<option value="${e.id||e.Id}" ${((e.id||e.Id)===(v.empresaId||v.EmpresaId))?'selected':''}>${e.nomeFantasia||e.NomeFantasia}</option>`).join('');
+  const pes = (window._perfisList||[]).map(p=>`<option value="${p.id||p.Id}" ${((p.id||p.Id)===(v.perfilId||v.PerfilId))?'selected':''}>${p.descricaoPerfil||p.DescricaoPerfil}</option>`).join('');
+  openModal(id ? 'Editar Usuário' : 'Novo Usuário', `
+    <div class="form-grid">
+      <div class="form-group full"><label>Nome *</label><input id="f-u-nome" value="${v.nome||v.Nome||''}"></div>
+      <div class="form-group"><label>Login *</label><input id="f-u-login" value="${v.login||v.Login||''}"></div>
+      <div class="form-group"><label>Senha ${id?'(deixe vazio para não alterar)':' *'}</label><input id="f-u-senha" type="password"></div>
+      <div class="form-group full"><label>E-mail</label><input id="f-u-email" type="email" value="${v.email||v.Email||''}"></div>
+      <div class="form-group"><label>Empresa</label><select id="f-u-empresa"><option value="">—</option>${ems}</select></div>
+      <div class="form-group"><label>Perfil</label><select id="f-u-perfil"><option value="">—</option>${pes}</select></div>
+      <div class="form-group"><label>Status</label>
+        <select id="f-u-ativo"><option value="true" ${(v.indAtivo||v.IndAtivo)?'selected':''}>Ativo</option><option value="false" ${!(v.indAtivo||v.IndAtivo)?'selected':''}>Inativo</option></select>
+      </div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-primary" onclick="saveUsuario(${id||0})">${id?'Salvar':'Criar Usuário'}</button>`
+  );
+}
+
+async function saveUsuario(id) {
+  const body = {
+    nome: document.getElementById('f-u-nome').value.trim(),
+    login: document.getElementById('f-u-login').value.trim(),
+    email: document.getElementById('f-u-email').value.trim(),
+    empresaId: parseInt(document.getElementById('f-u-empresa').value)||0,
+    perfilId: parseInt(document.getElementById('f-u-perfil').value)||0,
+    indAtivo: document.getElementById('f-u-ativo').value === 'true',
+  };
+  const senha = document.getElementById('f-u-senha').value;
+  if (senha) body.senha = senha;
+  if (!body.nome || !body.login) { toast('Nome e Login são obrigatórios.','error'); return; }
+  if (!id && !senha) { toast('Senha é obrigatória ao criar usuário.','error'); return; }
+  try {
+    if (id) await api.put(`/Usuario/${id}`, body);
+    else await api.post('/Usuario', { ...body, senha });
+    toast(id ? 'Usuário atualizado!' : 'Usuário criado!');
+    closeModal(); loadUsuarios();
+  } catch(e) { toast(e.response?.data || 'Erro ao salvar usuário.','error'); }
+}
+
+async function deleteUsuario(id, nome) {
+  if (!await confirm('Excluir usuário?', `"${nome}" será removido permanentemente.`)) return;
+  try { await api.delete(`/Usuario/${id}`); toast('Usuário excluído.'); loadUsuarios(); }
+  catch(e) { toast('Erro ao excluir usuário.','error'); }
+}
+
+// ══════════════════════════════════════════════
+// ── PERFIS ──
+// ══════════════════════════════════════════════
+let perfisData = [];
+async function loadPerfis() {
+  document.getElementById('table-perfis').innerHTML = '<div class="loading"><span class="spinner"></span>Carregando...</div>';
+  try {
+    const { data } = await api.get('/Perfil');
+    perfisData = data || [];
+    renderPerfis(perfisData);
+  } catch(e) { document.getElementById('table-perfis').innerHTML = '<div class="empty"><p>Erro ao carregar perfis.</p></div>'; }
+}
+
+function renderPerfis(list) {
+  document.getElementById('table-perfis').innerHTML = list.length
+    ? `<table>
+        <thead><tr><th>ID</th><th>Descrição</th><th style="text-align:right">Ações</th></tr></thead>
+        <tbody>${list.map(p=>`<tr>
+          <td class="text-muted">#${p.id||p.Id}</td>
+          <td><strong>${p.descricaoPerfil||p.DescricaoPerfil||'—'}</strong></td>
+          <td style="text-align:right">
+            <div class="flex gap-2" style="justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="openPerfilModal(${p.id||p.Id})" title="Editar">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="deletePerfil(${p.id||p.Id},'${(p.descricaoPerfil||p.DescricaoPerfil||'').replace(/'/g,"\\'")}')">
+                <svg width="13" height="13" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    : `<div class="empty"><p>Nenhum perfil cadastrado.</p></div>`;
+}
+
+document.getElementById('search-perfis').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderPerfis(perfisData.filter(p => (p.descricaoPerfil||p.DescricaoPerfil||'').toLowerCase().includes(q)));
+});
+
+function openPerfilModal(id) {
+  const p = id ? perfisData.find(x => (x.id||x.Id) === id) : null;
+  const v = p || {};
+  openModal(id ? 'Editar Perfil' : 'Novo Perfil', `
+    <div class="form-grid one-col">
+      <div class="form-group"><label>Descrição do Perfil *</label><input id="f-p-desc" value="${v.descricaoPerfil||v.DescricaoPerfil||''}" placeholder="ex: Administrador, Operador..."></div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-primary" onclick="savePerfil(${id||0})">${id?'Salvar':'Criar Perfil'}</button>`
+  );
+}
+
+async function savePerfil(id) {
+  const body = { descricaoPerfil: document.getElementById('f-p-desc').value.trim() };
+  if (!body.descricaoPerfil) { toast('Descrição é obrigatória.','error'); return; }
+  try {
+    if (id) await api.put(`/Perfil/${id}`, body);
+    else await api.post('/Perfil', body);
+    toast(id ? 'Perfil atualizado!' : 'Perfil criado!');
+    closeModal(); loadPerfis();
+  } catch(e) { toast(e.response?.data || 'Erro ao salvar perfil.','error'); }
+}
+
+async function deletePerfil(id, desc) {
+  if (!await confirm('Excluir perfil?', `"${desc}" será removido permanentemente.`)) return;
+  try { await api.delete(`/Perfil/${id}`); toast('Perfil excluído.'); loadPerfis(); }
+  catch(e) { toast('Erro ao excluir perfil.','error'); }
+}
+
+// ── Startup ──
+if (token && userData) initApp();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<div id="toast-container"></div>
+
+<!-- Contêiner principal da página: compensa a largura da sidebar e dá padding -->
+<main class="lg:pl-64 p-6">
+
+  <h1 class="text-xl font-semibold m-4">{{title}}</h1>
+  
+  <form action="" (ngSubmit)="saveRegistro(empresa,usuario)" method="post">
+
+    @if(!empresa || !empresa.id){
+    <br>   
+    <h2 class="text-xl font-semibold mb-4">{{titleEmpresa}}</h2>
+    <hr>
+    <br>
+    <div class="form-grid grid lg:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="block mb-1">Nome Fantasia *</label>
+        <input id="f-nfantasia" name="nomeFantasia" class="input w-full" [(ngModel)]="empresa.nomeFantasia" required>
+      </div>
+      <div>
+        <label class="block mb-1">Razão Social *</label>
+        <input id="f-rsocial" name="razaoSocial" class="input w-full" [(ngModel)]="empresa.razaoSocial" required>
+      </div>
+      <div>
+        <label class="block mb-1">CNPJ *</label>
+        <input id="f-cnpj" name="cnpj" class="input w-full" mask="00.000.000/0000-00" [(ngModel)]="empresa.cnpj" placeholder="00.000.000/0000-00" required>
+      </div>
+    </div>
+    }
+
+    <br>
+    <h2 class="text-xl font-semibold m-4">{{titleUsuario}}</h2>
+    <hr>
+    <br>
+    <div class="form-grid grid lg:grid-cols-2 gap-4 m-4">
+      <div>
+        <label class="block mb-1">Nome *</label>
+        <input id="f-nome" name="nome" class="input w-full" [(ngModel)]="usuario.nome" required>
+      </div>
+      <div>
+        <label class="block mb-1">Login *</label>
+        <input id="f-login" name="login" class="input w-full" [(ngModel)]="usuario.login" required>
+      </div>
+      <div>
+      <label class="block mb-1">Senha *</label>
+        <input id="f-senha" name="senha" type="password" class="input w-full" [(ngModel)]="usuario.senha" required>
+      </div>
+      <div>
+        <label class="block mb-1">Email *</label>
+        <input id="f-email" name="email" class="input w-full" [(ngModel)]="usuario.email" required>
+      </div>
+  </div>
+
+  <div class="flex gap-2 m-4">
+    <button class="btn btn-primary" type="submit">
+      Salvar
+    </button>
+    <button class="btn btn-ghost" (click)="cancelar()">Cancelar</button>   
+  </div>
+
+  </form>
+
+</main>
