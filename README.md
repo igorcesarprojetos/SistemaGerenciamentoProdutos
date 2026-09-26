@@ -301,4 +301,4 @@ Os endpoints `GET /Produto/RelatorioPdf` e `GET /Categoria/RelatorioPdf` geram r
 
 ## Licença
 
-Projeto de uso educacional/portfólio. Ajuste esta seção conforme a licença desejada (ex.: MIT) antes de publicar o repositório.
+Projeto de uso educacional/portfólio.
