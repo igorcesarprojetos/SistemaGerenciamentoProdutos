@@ -54,6 +54,11 @@ constructor(
     if(authService.isAuthenticated()){
       this.user = authService.getUser();      
       this.isHandset = true;
+      if(this.user?.descricaoPerfil !== 'Administrador'){        
+        window.alert('Para aparecer as opções de menu referente as telas de Produtos, Empresas, Perfis e Categorias, o usuário terá que está no perfil de Administrador.' +
+          'Por favor mudar o perfil na tela de cadastro do seu usuário na tela de usuários.'+
+        'Em seguida deslogue do sistema e faça o login novamente com o usuário que está no perfil de Administrador para ter acesso as telas de Produtos, Empresas, Perfis e Categorias.');        
+      }
     }
   }
 

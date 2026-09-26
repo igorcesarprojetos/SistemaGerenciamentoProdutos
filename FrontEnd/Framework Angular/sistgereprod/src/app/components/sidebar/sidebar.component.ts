@@ -3,6 +3,8 @@ import { Component, Input, AfterViewInit, HostListener, OnDestroy } from '@angul
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription, filter } from 'rxjs';
+import { Usuario } from '../../model/usuario';
+import { Perfil } from '../../model/perfil';
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -19,6 +21,8 @@ export class SidebarComponent implements AfterViewInit, OnDestroy {
 
   public isOpen = false;
   private routerSub?: Subscription;
+
+  public usuario:Usuario = new Usuario();
 
   constructor(private router: Router, private authService: AuthService) {
     this.routerSub = this.router.events
@@ -76,6 +80,10 @@ export class SidebarComponent implements AfterViewInit, OnDestroy {
       if (perfilEl) perfilEl.textContent = userData.descricaoPerfil || userData.DescricaoPerfil || '—';
       if (empresaEl) empresaEl.textContent = userData.nomeEmpresa || userData.NomeEmpresa || '—';
       if (avatarEl) avatarEl.textContent = n.substring(0, 2).toUpperCase();
+
+      this.usuario.perfil = new Perfil();
+      this.usuario.perfil.descricaoPerfil = userData.descricaoPerfil || userData.DescricaoPerfil || '';
+  
     }
   }
 }

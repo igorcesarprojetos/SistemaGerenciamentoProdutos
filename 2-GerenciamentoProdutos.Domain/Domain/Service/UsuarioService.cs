@@ -36,9 +36,19 @@ namespace GerenciamentoProdutos.Domain.Service
                 {
                     var userfromDB = this.GetLoginPassword(usuario.Login, usuario.Senha);
 
-                    if (userfromDB.Result != null)
+                    //if (userfromDB.Result != null)
+                    //{
+                    //    if (userfromDB.Result.Senha != HelperSHA256.Encrypt(usuario.Senha))
+                    //    {
+                    //        var password = HelperSHA256.Encrypt(usuario.Senha);
+                    //        usuario.Senha = password;
+                    //    }
+                    //}
+                    if (userfromDB.Result == null)
                     {
-                        if (userfromDB.Result.Senha != HelperSHA256.Encrypt(usuario.Senha))
+                        var usuarioRepository = _usuarioRepository.GetById(usuario.Id);
+
+                        if (usuario.Senha != usuarioRepository.Senha && HelperSHA256.Encrypt(usuario.Senha) != usuarioRepository.Senha)
                         {
                             var password = HelperSHA256.Encrypt(usuario.Senha);
                             usuario.Senha = password;

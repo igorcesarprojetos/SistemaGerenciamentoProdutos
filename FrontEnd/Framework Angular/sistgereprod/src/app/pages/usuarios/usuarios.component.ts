@@ -125,13 +125,17 @@ export class UsuariosComponent implements OnInit{
           const usuarioForm = new Usuario({        
             nome: (document.getElementById('f-u-nome') as HTMLInputElement)?.value?.trim() || '',
             login: (document.getElementById('f-u-login') as HTMLInputElement)?.value?.trim() || '',
-            senha: (document.getElementById('f-u-senha') as HTMLInputElement)?.value?.trim() || '',
+            senha:  (document.getElementById('f-u-senha') as HTMLInputElement)?.value?.trim() || this.usuario?.senha,
             email: (document.getElementById('f-u-email') as HTMLInputElement)?.value?.trim() || '',
             empresaId: Number((document.getElementById('f-u-empresa') as HTMLSelectElement)?.value) || 0,
             perfilId: Number((document.getElementById('f-u-perfil') as HTMLSelectElement)?.value) || 0,
             indAtivo: (document.getElementById('f-u-ativo') as HTMLSelectElement)?.value === 'true',       
           });
 
+          if (!usuarioForm.senha.length) {
+            this.common.toast('Senha é obrigatória.', 'error');
+            return;
+          }
           this.saveUsuario(id || 0, usuarioForm);
           this.modalRef?.content.closeModal();
         });
