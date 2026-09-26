@@ -140,9 +140,9 @@ Todas as entidades herdam de `BaseEntitie` (chave primária `Id`) e possuem vali
 
 ## Funcionalidades
 
-- Cadastro público de **empresa** e **usuário administrador** (tela de registro)
+- Cadastro público de **empresa** e **usuário com perfil de "Registro Inicial"** (tela de registro)
 - **Login** com geração de token JWT (contendo usuário, empresa e perfil)
-- CRUD completo de **Produtos**, **Categorias**, **Empresas**, **Usuários** e **Perfis**
+- CRUD completo de **Produtos**, **Categorias**, **Empresas**, **Usuários** e **Perfis** . **OBS: Para ter acesso a todos esses CRUDs o usuario terá que alterar seu perfil para "Administrador"
 - Endpoints protegidos por `[Authorize]` (exceto login e registro)
 - **Dashboard** com indicadores e gráficos no front-end Angular
 - **Emissão de relatório em PDF** de Produtos e de Categorias (FastReport)
